@@ -668,6 +668,9 @@
                 ui.log(`👑 ${name}社長が代表取締役に就任しました！初期4部門（各1名配置）で経営を開始します。`, 'text-blue-300 font-bold');
                 ui.updateAll();
                 mapRenderer.resetView();
+
+                // 設立初年度（4月）の新卒者採用イベントを自動発生
+                this.triggerRecruitmentEvent('NEW_GRAD');
             }
 
             // 全127ヘックスに空きなく7種の物件と初期部門を配置
@@ -993,8 +996,8 @@
             }
 
             // 5. 人事部アクション：採用候補の更新＆面接モーダル
-            refreshRecruitCandidates(silent = false) {
-                const isNewGradSeason = (this.month === 4);
+            refreshRecruitCandidates(silent = false, forcedType = null) {
+                const isNewGradSeason = forcedType ? (forcedType === 'NEW_GRAD') : (this.month === 4);
                 const count = 3;
                 this.player.recruitCandidates = [];
                 const activeDepts = Object.keys(DEPT_MASTER).filter(d => this.player.deptLevels[d] > 0);
@@ -1002,18 +1005,43 @@
                     const targetDept = pickRandom(activeDepts);
                     const emp = createEmployeeObject(targetDept, {
                         isNewGrad: isNewGradSeason,
-                        lv: isNewGradSeason ? 1 : randInt(1, 3)
+                        lv: isNewGradSeason ? 1 : randInt(2, 4)
                     });
+                    emp.recruitType = isNewGradSeason ? '新卒' : '中途';
                     this.player.recruitCandidates.push(emp);
                 }
                 if (!silent) {
-                    ui.log(`🤝 ${isNewGradSeason ? '新卒採用' : '中途採用'}の応募者リストを更新しました。`, 'text-purple-300');
+                    ui.log(`🤝 ${isNewGradSeason ? '新卒者採用' : '中途採用'}の応募者リストを更新しました。`, 'text-purple-300');
                 }
+            }
+
+            // ターン開始時などに自動発生する採用イベント
+            triggerRecruitmentEvent(type = 'NEW_GRAD') {
+                const isNewGrad = type === 'NEW_GRAD';
+                this.refreshRecruitCandidates(true, type);
+                const titleEl = document.getElementById('recruit-modal-title');
+                if (titleEl) {
+                    titleEl.textContent = isNewGrad
+                        ? `🌸 ${this.year}年度 新卒者採用試験・役員合議`
+                        : `💼 定期中途採用面接・役員合議`;
+                }
+                ui.log(
+                    isNewGrad
+                        ? `🌸 【新卒者採用イベント発生】${this.year}年度の新卒応募者3名が来社しました！役員・人事部長・${this.player.presidentName}社長の合議で採否を決定してください。`
+                        : `💼 【中途採用イベント発生】即戦力の中途採用応募者3名が来社しました！採用面接・合議を実施します。`,
+                    'text-purple-300 font-bold'
+                );
+                ui.renderRecruitModal();
+                ui.openSubModal('recruit-modal');
             }
 
             openRecruitModal() {
                 if (this.player.recruitCandidates.length === 0) {
                     this.refreshRecruitCandidates(true);
+                }
+                const titleEl = document.getElementById('recruit-modal-title');
+                if (titleEl) {
+                    titleEl.textContent = this.month === 4 ? '🌸 新卒者採用試験・役員合議' : '📋 中途採用面接・役員合議';
                 }
                 ui.renderRecruitModal();
                 ui.openSubModal('recruit-modal');
@@ -1636,12 +1664,6 @@
                 this.recalculateStats();
                 this.player.ap = this.player.maxAp;
 
-                // 4月は新卒採用シーズンとして応募者更新
-                if (this.month === 4) {
-                    this.refreshRecruitCandidates(true);
-                    ui.log('🌸 4月になりました！新卒採用シーズンが到来しました。', 'text-pink-300 font-bold');
-                }
-
                 // 進行中の広告プロモーション処理
                 this.processPendingAds();
 
@@ -1652,6 +1674,15 @@
 
                 if (eventNotices.length > 0) {
                     ui.openEventModal(eventNotices);
+                }
+
+                // ストライキでAP=0になっていない場合、4月は新卒者採用・7月/10月/1月は中途採用イベントを自動発生
+                if (this.player.ap > 0) {
+                    if (this.month === 4) {
+                        this.triggerRecruitmentEvent('NEW_GRAD');
+                    } else if (this.month === 7 || this.month === 10 || this.month === 1) {
+                        this.triggerRecruitmentEvent('MID_CAREER');
+                    }
                 }
 
                 ui.updateAll();
@@ -2637,7 +2668,7 @@
                                             <div class="text-[10px] text-slate-400">${ad.desc}（規定魅力 +${ad.charmGain} / 所要 ${ad.minTurns}〜${ad.maxTurns}T）</div>
                                         </div>
                                         <button onclick="game.actionBroadcastAd('${ad.id}')" ${disabled ? 'disabled' : ''} class="btn-game bg-pink-600 hover:bg-pink-500 text-white font-bold px-3 py-1.5 rounded-xl text-[11px] whitespace-nowrap">
-                                            ${pending ? `出稿中(あと${pending.remainingTurns}T)` : `出稿 (${ad.cost}万)`}
+                                            ${pending ? `待機中(${pending.remainingTurns}T)` : `出稿 (${ad.cost}万)`}
                                         </button>
                                     </div>
                                 `;
