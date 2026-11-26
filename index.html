@@ -119,6 +119,9 @@
 
             <!-- 右：システム操作ボタン -->
             <div class="flex items-center gap-2">
+                <button id="btn-header-recruit" onclick="game.openRecruitModal()" class="hidden btn-game bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md animate-pulse">
+                    <i class="fa-solid fa-user-plus"></i><span id="btn-header-recruit-label">採用面接開催中</span>
+                </button>
                 <button onclick="ui.openSubModal('save-modal')" class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5">
                     <i class="fa-solid fa-floppy-disk"></i><span>セーブ/ロード</span>
                 </button>
@@ -1011,8 +1014,12 @@
                     this.player.recruitCandidates.push(emp);
                 }
                 if (!silent) {
-                    ui.log(`🤝 ${isNewGradSeason ? '新卒者採用' : '中途採用'}の応募者リストを更新しました。`, 'text-purple-300');
+                    ui.log(`📋 採用応募者リストを更新しました（${isNewGradSeason ? '新卒' : '中途'}応募者3名）。`, 'text-purple-300');
                 }
+            }
+
+            isRecruitTurn() {
+                return (this.month === 4 || this.month === 7 || this.month === 10 || this.month === 1) && this.player.ap > 0;
             }
 
             // ターン開始時などに自動発生する採用イベント
@@ -2292,6 +2299,18 @@
                     adBanner.classList.add('hidden');
                 }
 
+                // 採用可能ターンのトップバー採用ボタン表示制御
+                const headerRecruitBtn = document.getElementById('btn-header-recruit');
+                const headerRecruitLabel = document.getElementById('btn-header-recruit-label');
+                if (headerRecruitBtn && headerRecruitLabel) {
+                    if (game.isRecruitTurn()) {
+                        headerRecruitBtn.classList.remove('hidden');
+                        headerRecruitLabel.textContent = game.month === 4 ? '🌸 新卒採用開催中' : '💼 中途採用開催中';
+                    } else {
+                        headerRecruitBtn.classList.add('hidden');
+                    }
+                }
+
                 this.renderSelectedHexPanel();
                 this.renderTabContent();
             }
@@ -2548,15 +2567,20 @@
                                 <option value="AGE" ${this.empSortBy === 'AGE' ? 'selected' : ''}>年齢</option>
                                 ${STAT_KEYS.map(k => `<option value="${k}" ${this.empSortBy === k ? 'selected' : ''}>${STAT_LABELS[k]}</option>`).join('')}
                             </select>
-
-                            <button onclick="ui.empSortDesc = !ui.empSortDesc; ui.renderTabContent()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-2 py-1 text-amber-300 font-bold" title="昇順・降順切替">
-                                ${this.empSortDesc ? '▼ 降順' : '▲ 昇順'}
+                            <button onclick="ui.empSortDesc = !ui.empSortDesc; ui.renderTabContent()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 font-bold" title="昇順・降順切替">
+                                ${this.empSortDesc ? '▼' : '▲'}
                             </button>
                         </div>
-
-                        <button onclick="ui.openSwapDeptModal()" class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] flex items-center gap-1">
-                            <i class="fa-solid fa-right-left"></i><span>部署入替</span>
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            ${game.isRecruitTurn() ? `
+                                <button onclick="game.openRecruitModal()" class="btn-game bg-purple-600 hover:bg-purple-500 text-white font-black px-2.5 py-1 rounded-lg text-[11px] flex items-center gap-1">
+                                    <i class="fa-solid fa-user-plus"></i><span>${game.month === 4 ? '新卒採用' : '中途採用'}</span>
+                                </button>
+                            ` : ''}
+                            <button onclick="ui.openSwapDeptModal()" class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] flex items-center gap-1">
+                                <i class="fa-solid fa-right-left"></i><span>部署入替</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 社員カード一覧 -->
