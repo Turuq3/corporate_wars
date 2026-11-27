@@ -65,7 +65,10 @@
     <div id="setup-modal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto">
         <div class="bg-slate-900 border-2 border-amber-500/60 rounded-2xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl my-auto">
             <div class="text-center mb-5">
-                <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black px-3 py-1 rounded-full mb-2">CORPORATE WARS - 企業陣取り経営SLG</span>
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black px-3 py-1 rounded-full">CORPORATE WARS - 企業陣取り経営SLG</span>
+                    <span class="inline-block bg-slate-800 text-sky-300 border border-sky-500/40 text-xs font-black px-2.5 py-1 rounded-full">Ver. 1.13.0</span>
+                </div>
                 <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">🏢 代表取締役社長 就任設定</h1>
                 <p class="text-xs sm:text-sm text-slate-300 mt-1">社長名と初期経営タイプ（5候補から1つ）を選択して会社を設立してください。</p>
             </div>
@@ -107,6 +110,7 @@
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black px-2.5 py-1 rounded-xl text-xs sm:text-sm shadow">
                     🏢 <span id="hdr-comp-name">アーク・イノベーション</span>
                 </div>
+                <span class="text-[10px] font-black text-sky-300 bg-slate-800/90 border border-sky-500/40 px-2 py-0.5 rounded-md">Ver. 1.13.0</span>
                 <div class="text-xs font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
                     <span id="hdr-pres-name">天海 翔太社長</span>
                 </div>
@@ -497,7 +501,7 @@
             },
             HR: {
                 id: 'HR', name: '人事部', short: '人事部', icon: '🤝', unlockLv: 1, cost: 0,
-                mainStat: 'charm', desc: '新卒/中途採用・ヘッドハンティング・学生青田刈り・職員海外研修を担当'
+                mainStat: 'charm', desc: '新卒/中途採用・ヘッドハンティング・学生青田買い・職員海外研修を担当'
             },
             PR: {
                 id: 'PR', name: '広報部', short: '広報部', icon: '📢', unlockLv: 5, cost: 600,
@@ -664,6 +668,7 @@
                     ap: 3,
                     maxAp: 3,
                     strikeTurns: 0,
+                    aotagariCooldown: 0, // 学生青田刈りクールダウン（残りターン数）
                     hackingDefenseActive: false, // ハッキング防御（敵の攻撃を一度防ぐ）
                     deptLevels: { SALES: 1, ACCOUNT: 1, GENERAL: 1, HR: 1, PR: 0, IT: 0, RND: 0 },
                     employees: [],
@@ -749,6 +754,7 @@
                 this.year = 1;
                 this.month = 4;
                 this.gameOver = false;
+                this.player.aotagariCooldown = 0;
                 this.player.hackingDefenseActive = false;
                 this.enemy.hackingDefenseActive = false;
 
@@ -1563,6 +1569,19 @@
                 return 2;
             }
 
+            // 学生青田買いの候補者数（企業魅力値により1〜3名で変動）
+            getAotagaiApplicantCount() {
+                const charm = this.player.charm || 50;
+                if (charm >= 95) return 3;
+                if (charm >= 60) return 2;
+                return 1;
+            }
+
+            // 学生青田買いの実施可能期間判定（10月〜3月）
+            isAotagaiSeason() {
+                return [10, 11, 12, 1, 2, 3].includes(this.month);
+            }
+
             refreshRecruitCandidates(type = null, silent = false, forceNew = false) {
                 const targetType = type || (this.month === 4 ? 'NEW_GRAD' : 'MID_CAREER');
 
@@ -1576,7 +1595,13 @@
 
                 this.recruitType = targetType;
                 this.recruitGeneratedTurn = this.turn;
-                const count = (targetType === 'HEADHUNT' || targetType === 'AOTAGARI') ? 3 : this.getRecruitApplicantCount();
+                let count = this.getRecruitApplicantCount();
+                if (targetType === 'HEADHUNT') {
+                    count = 1;
+                } else if (targetType === 'AOTAGARI') {
+                    count = this.getAotagaiApplicantCount();
+                }
+
                 const list = [];
                 for (let i = 0; i < count; i++) {
                     const emp = this.createEmployee({
@@ -1593,39 +1618,60 @@
                 }
             }
 
+            // ヘッドハンティング（通年実施可・発見率30%・成功時1名・成否問わず4Tクールタイム）
             actionHeadhunting() {
+                if ((this.player.headhuntCooldown || 0) > 0) {
+                    return ui.log(`⚠️ ヘッドハンティングは現在準備中です（あと${this.player.headhuntCooldown}ターン実施不可）。`, 'text-amber-400');
+                }
                 if (this.player.ap <= 0) return ui.log('⚠️ 行動力（AP）が不足しています。', 'text-amber-400');
                 const cost = 500;
                 if (this.player.funds < cost) return ui.log(`⚠️ ヘッドハンティング調査費（${cost}万円）が不足しています。`, 'text-rose-400');
+
                 this.player.ap -= 1;
                 this.player.funds -= cost;
+                this.player.headhuntCooldown = 4;
                 this.gainEmployeeExp('HR', 25, 'PLAYER');
-                ui.log(`🎯 人事部がヘッドハンティングを実施！エリート人材候補を発掘しました。`, 'text-amber-300 font-bold');
-                this.refreshRecruitCandidates('HEADHUNT', false, true);
+
+                if (Math.random() < 0.30) {
+                    ui.log(`🎯 人事部がヘッドハンティングに成功！エリート人材候補 1名を発掘しました（次回実施まで4ターン）。`, 'text-amber-300 font-bold');
+                    this.refreshRecruitCandidates('HEADHUNT', false, true);
+                } else {
+                    ui.log(`💨 人事部がヘッドハンティングを実施しましたが、今回は条件に合う人材を発見できませんでした…（次回実施まで4ターン）`, 'text-slate-400 font-bold');
+                }
                 ui.updateAll();
             }
 
+            // 学生青田買い（10月〜3月のみ実施可・候補者1〜3名で魅力値により変動）
             actionStudentAotagari() {
+                if (!this.isAotagaiSeason()) {
+                    return ui.log('⚠️ 学生青田買いは10月〜3月の期間のみ実施可能です。', 'text-amber-400');
+                }
                 if (this.player.ap <= 0) return ui.log('⚠️ 行動力（AP）が不足しています。', 'text-amber-400');
                 const cost = 350;
-                if (this.player.funds < cost) return ui.log(`⚠️ 青田刈りリクルート費（${cost}万円）が不足しています。`, 'text-rose-400');
+                if (this.player.funds < cost) return ui.log(`⚠️ 学生青田買いリクルート費（${cost}万円）が不足しています。`, 'text-rose-400');
+
                 this.player.ap -= 1;
                 this.player.funds -= cost;
                 this.gainEmployeeExp('HR', 25, 'PLAYER');
-                ui.log(`🎓 人事部が学生青田刈りを実施！成長率抜群の有望学生を発掘しました。`, 'text-emerald-300 font-bold');
+                const count = this.getAotagaiApplicantCount();
+                ui.log(`🎓 人事部が学生青田買いを実施！企業魅力（${this.player.charm}）により有望学生 ${count}名を発掘しました。`, 'text-emerald-300 font-bold');
                 this.refreshRecruitCandidates('AOTAGARI', false, true);
                 ui.updateAll();
             }
 
             actionStudentAotagari() {
+                if ((this.player.aotagariCooldown || 0) > 0) {
+                    return ui.log(`⚠️ 学生青田刈りは実施後2ターンのクールダウンが必要です（あと${this.player.aotagariCooldown}ターン）。`, 'text-amber-400');
+                }
                 if (this.player.ap <= 0) return ui.log('⚠️ 行動力（AP）が不足しています。', 'text-amber-400');
                 const cost = 350;
                 if (this.player.funds < cost) return ui.log(`⚠️ 青田刈りリクルート費（${cost}万円）が不足しています。`, 'text-rose-400');
                 this.player.ap -= 1;
                 this.player.funds -= cost;
+                this.player.aotagariCooldown = 2; // 実施後2ターン再実行不可
                 this.gainEmployeeExp('HR', 25, 'PLAYER');
-                ui.log(`🎓 人事部が学生青田刈りを実施！成長率抜群の有望学生を発掘しました。`, 'text-emerald-300 font-bold');
-                this.refreshRecruitCandidates('AOTAGARI', false);
+                ui.log(`🎓 人事部が学生青田刈りを実施！成長率抜群の有望学生を発掘しました（実施後2ターン再実行不可）。`, 'text-emerald-300 font-bold');
+                this.refreshRecruitCandidates('AOTAGARI', false, true);
                 ui.updateAll();
             }
 
@@ -1957,10 +2003,18 @@
 
                 // 5. 次ターン・年月進行
                 this.turn += 1;
+                if ((this.player.aotagariCooldown || 0) > 0) {
+                    this.player.aotagariCooldown -= 1;
+                }
                 this.month += 1;
                 if (this.month > 12) {
                     this.month = 1;
                     this.year += 1;
+                }
+
+                // ヘッドハンティングのクールタイム減少
+                if ((this.player.headhuntCooldown || 0) > 0) {
+                    this.player.headhuntCooldown -= 1;
                 }
 
                 // 6. 銀行融資期限チェック
@@ -2483,7 +2537,7 @@
                                 ${dept.id === 'HR' ? `
                                     <button onclick="ui.openRecruitModal()" class="btn-game bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">🤝 採用面接</button>
                                     <button onclick="game.actionHeadhunting()" ${game.player.ap <= 0 || game.player.funds < 500 ? 'disabled' : ''} class="btn-game bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">🎯 ヘッドハンティング (500万)</button>
-                                    <button onclick="game.actionStudentAotagari()" ${game.player.ap <= 0 || game.player.funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">🎓 学生青田刈り (350万)</button>
+                                    <button onclick="game.actionStudentAotagari()" ${(game.player.aotagariCooldown || 0) > 0 || game.player.ap <= 0 || game.player.funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">${(game.player.aotagariCooldown || 0) > 0 ? `🎓 青田刈り待機(あと${game.player.aotagariCooldown}T)` : '🎓 学生青田刈り (350万)'}</button>
                                     <button onclick="ui.openOverseasModal()" ${game.player.ap <= 0 || game.player.funds < 400 ? 'disabled' : ''} class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">✈️ 職員海外研修 (400万)</button>
                                 ` : ''}
                                 ${dept.id === 'ACCOUNT' ? `
@@ -2688,8 +2742,8 @@
                                 <button onclick="game.actionHeadhunting()" ${ap <= 0 || funds < 500 ? 'disabled' : ''} class="btn-game bg-amber-600 hover:bg-amber-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
                                     🎯 ヘッドハンティング (500万/AP1)
                                 </button>
-                                <button onclick="game.actionStudentAotagari()" ${ap <= 0 || funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
-                                    🎓 学生青田刈り (350万/AP1)
+                                <button onclick="game.actionStudentAotagari()" ${(game.player.aotagariCooldown || 0) > 0 || ap <= 0 || funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
+                                    ${(game.player.aotagariCooldown || 0) > 0 ? `🎓 学生青田刈り (あと${game.player.aotagariCooldown}T)` : '🎓 学生青田刈り (350万/AP1)'}
                                 </button>
                                 <button onclick="ui.openOverseasModal()" ${ap <= 0 || funds < 400 ? 'disabled' : ''} class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
                                     ✈️ 職員海外研修 (400万/AP1)
@@ -3026,13 +3080,16 @@
                 const titles = {
                     NEW_GRAD: '🌸 新卒者採用面接・役員合議',
                     MID_CAREER: '💼 中途採用面接・役員合議',
-                    HEADHUNT: '🎯 ヘッドハンティング特別面談',
-                    AOTAGARI: '🎓 学生青田刈り早期内定面談'
+                    HEADHUNT: '🎯 ヘッドハンティング特別面談（1名限定）',
+                    AOTAGARI: '🎓 学生青田買い早期内定面談'
                 };
                 document.getElementById('recruit-modal-title').textContent = titles[game.recruitType] || '🤝 採用面接・役員合議';
 
                 const execs = game.player.employees.filter(e => ['MANAGING', 'SENIOR', 'VP'].includes(e.rank) && e.overseasTurnsLeft <= 0);
-                const charmInfo = `<span class="text-pink-300 font-bold">（現在の企業魅力 ${game.player.charm} ／ 応募枠 ${game.getRecruitApplicantCount()}名）</span>`;
+                const countInfo = game.recruitType === 'HEADHUNT'
+                    ? 'ヘッドハンティング発掘：1名'
+                    : (game.recruitType === 'AOTAGARI' ? `学生青田買い応募枠：${game.getAotagaiApplicantCount()}名` : `応募枠：${game.getRecruitApplicantCount()}名`);
+                const charmInfo = `<span class="text-pink-300 font-bold">（現在の企業魅力 ${game.player.charm} ／ ${countInfo}）</span>`;
                 document.getElementById('recruit-council-info').innerHTML = (execs.length === 0
                     ? `⚖️ <b>合議体制：</b>現在、常務・専務・副社長が不在のため、<b>${game.player.presName}社長の判断のみで即決採用</b>できます。`
                     : `⚖️ <b>合議体制：</b>${game.player.presName}社長 ＋ 人事部員 ＋ 在籍役員（${execs.map(e => `${e.name}${game.getRankLabel(e.rank)}`).join('・')}）の<b>多数決</b>で採否を決定します。`) + charmInfo;
@@ -3397,6 +3454,9 @@
                 game.month = data.month;
                 game.gameOver = false;
                 game.player = data.player;
+                if (typeof game.player.aotagariCooldown !== 'number') {
+                    game.player.aotagariCooldown = 0;
+                }
                 if (typeof game.player.hackingDefenseActive !== 'boolean') {
                     game.player.hackingDefenseActive = false;
                 }
