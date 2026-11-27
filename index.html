@@ -63,11 +63,11 @@
 
     <!-- 社長就任・初期パラメータ5択モーダル -->
     <div id="setup-modal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto">
-        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-2xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl my-auto">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-2xl max-w-5xl w-full p-5 sm:p-6 shadow-2xl my-auto">
             <div class="text-center mb-5">
                 <div class="flex items-center justify-center gap-2 mb-2">
                     <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black px-3 py-1 rounded-full">CORPORATE WARS - 企業陣取り経営SLG</span>
-                    <span class="inline-block bg-slate-800 text-sky-300 border border-sky-500/40 text-xs font-black px-2.5 py-1 rounded-full">Ver. 1.13.0</span>
+                    <span class="inline-block bg-slate-800 text-sky-300 border border-sky-500/40 text-xs font-black px-2.5 py-1 rounded-full">Ver. 1.14.0</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">🏢 代表取締役社長 就任設定</h1>
                 <p class="text-xs sm:text-sm text-slate-300 mt-1">社長名と初期経営タイプ（5候補から1つ）を選択して会社を設立してください。</p>
@@ -90,7 +90,7 @@
                     <i class="fa-solid fa-rotate mr-1"></i>候補を再抽選
                 </button>
             </div>
-            <div id="president-presets-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-[48vh] overflow-y-auto custom-scroll pr-1"></div>
+            <div id="president-presets-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-6 max-h-[50vh] overflow-y-auto custom-scroll pr-1"></div>
 
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800">
                 <button onclick="ui.openSaveModal('LOAD')" class="w-full sm:w-auto btn-game bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/40 font-bold px-4 py-2.5 rounded-xl text-xs">
@@ -110,7 +110,7 @@
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black px-2.5 py-1 rounded-xl text-xs sm:text-sm shadow">
                     🏢 <span id="hdr-comp-name">アーク・イノベーション</span>
                 </div>
-                <span class="text-[10px] font-black text-sky-300 bg-slate-800/90 border border-sky-500/40 px-2 py-0.5 rounded-md">Ver. 1.13.0</span>
+                <span class="text-[10px] font-black text-sky-300 bg-slate-800/90 border border-sky-500/40 px-2 py-0.5 rounded-md">Ver. 1.14.0</span>
                 <div class="text-xs font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
                     <span id="hdr-pres-name">天海 翔太社長</span>
                 </div>
@@ -2324,13 +2324,15 @@
                 container.innerHTML = game.presidentPresets.map((p, idx) => {
                     const selected = idx === game.selectedPresetIndex;
                     return `
-                        <div onclick="game.selectedPresetIndex=${idx}; ui.renderPresidentPresets();" class="cursor-pointer rounded-xl p-3 border-2 transition-all ${selected ? 'bg-amber-500/15 border-amber-400 shadow-lg' : 'bg-slate-800/80 border-slate-700 hover:border-slate-500'}">
-                            <div class="flex items-center justify-between mb-1.5">
-                                <span class="text-[10px] font-black px-2 py-0.5 rounded ${selected ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-300'}">候補 ${idx + 1}</span>
-                                ${selected ? '<span class="text-xs text-amber-300 font-black">✔ 選択中</span>' : ''}
+                        <div onclick="game.selectedPresetIndex=${idx}; ui.renderPresidentPresets();" class="cursor-pointer rounded-xl p-2.5 border-2 transition-all flex flex-col justify-between ${selected ? 'bg-amber-500/15 border-amber-400 shadow-lg' : 'bg-slate-800/80 border-slate-700 hover:border-slate-500'}">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[10px] font-black px-1.5 py-0.5 rounded ${selected ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-300'}">候補 ${idx + 1}</span>
+                                    ${selected ? '<span class="text-[10px] text-amber-300 font-black">✔ 選択中</span>' : ''}
+                                </div>
+                                <div class="text-[11px] font-black text-white mb-2 leading-tight">${p.title}</div>
                             </div>
-                            <div class="text-xs font-black text-white mb-2">${p.title}</div>
-                            <div class="space-y-1 text-[11px]">
+                            <div class="space-y-1 text-[10px] bg-slate-950/60 p-1.5 rounded-lg border border-slate-800/80">
                                 ${STAT_KEYS.map(k => {
                                     const val = p.stats[k];
                                     const isHigh = val >= 120;
