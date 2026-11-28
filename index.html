@@ -67,7 +67,7 @@
             <div class="text-center mb-5">
                 <div class="flex items-center justify-center gap-2 mb-2">
                     <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black px-3 py-1 rounded-full">CORPORATE WARS - 企業陣取り経営SLG</span>
-                    <span class="inline-block bg-slate-800 text-sky-300 border border-sky-500/40 text-xs font-black px-2.5 py-1 rounded-full">Ver. 1.14.0</span>
+                    <span class="inline-block bg-slate-800 text-sky-300 border border-sky-500/40 text-xs font-black px-2.5 py-1 rounded-full">Ver. 1.15.0</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">🏢 代表取締役社長 就任設定</h1>
                 <p class="text-xs sm:text-sm text-slate-300 mt-1">社長名と初期経営タイプ（5候補から1つ）を選択して会社を設立してください。</p>
@@ -110,7 +110,7 @@
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black px-2.5 py-1 rounded-xl text-xs sm:text-sm shadow">
                     🏢 <span id="hdr-comp-name">アーク・イノベーション</span>
                 </div>
-                <span class="text-[10px] font-black text-sky-300 bg-slate-800/90 border border-sky-500/40 px-2 py-0.5 rounded-md">Ver. 1.14.0</span>
+                <span class="text-[10px] font-black text-sky-300 bg-slate-800/90 border border-sky-500/40 px-2 py-0.5 rounded-md">Ver. 1.15.0</span>
                 <div class="text-xs font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
                     <span id="hdr-pres-name">天海 翔太社長</span>
                 </div>
@@ -307,7 +307,7 @@
             <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
                 <div>
                     <h2 id="recruit-modal-title" class="text-lg font-black text-white">🤝 採用面接・役員合議室</h2>
-                    <p id="recruit-modal-desc" class="text-xs text-slate-400">候補者を確認し、配属先を指定して採用採決（社長・人事部長・常務・専務・副社長の合議）を行います。</p>
+                    <p id="recruit-modal-desc" class="text-xs text-slate-400">候補者を確認し、配属先を指定して採用採決（社長・人事部長・専務・常務・副社長の合議）を行います。</p>
                 </div>
                 <button onclick="ui.closeModal('recruit-modal')" class="text-slate-400 hover:text-white text-lg font-black px-2">✕</button>
             </div>
@@ -460,6 +460,7 @@
             <div class="text-xs text-slate-300 space-y-2.5 max-h-[65vh] overflow-y-auto custom-scroll pr-1 leading-relaxed">
                 <p><b class="text-white">🏆 勝利条件：</b>① 全271ヘックスを自陣営が取得する、② ライバル企業を破産（資産0未満）させる、③ ライバル企業の全稼働施設（部門ヘックス）の耐久値を0にする、のいずれかで勝利となります。</p>
                 <p><b class="text-white">🏢 部門と予定地ヘックス：</b>営業・経理・総務・人事は初期稼働済み。広報部（Lv.5〜）・情報システム部（Lv.10〜）・研究開発部（Lv.15〜）は自社エリアにグレーアウト予定地として配置されており、条件達成後に稼働開始できます。</p>
+                <p><b class="text-white">🎖️ 社員の役職昇進制度：</b>平社員から「係長 → 課長 → 部長 → 専務（最大6名） → 常務（最大4名） → 副社長（最大2名）」の順に1段階ずつ昇進できます（AP消費なし）。昇進すると能力上限値と月収が上昇し、昇進後1年間（12ターン）は次の役職へ昇進できません。</p>
                 <p><b class="text-white">💻 情報システム部のサイバー攻防：</b>稼働すると最大AP+1に加え、「特定部門攻撃」「総合攻撃（ランダム）」「ハッキング防御（敵の攻撃を一度防ぐ・メイン画面に防御中表示）」が実行できます。</p>
                 <p><b class="text-white">🏘️ 全13種の物件と増資：</b>駐車場・一戸建住宅・コンビニ・倉庫・小店舗・事務所・商店街・工場・スーパーマーケット・マンション・ホテル・タワーマンション・大学が登場。買収から12ターン経過すると規模に応じた限度額まで「増資」でき、収益UP・耐久上限UP・削られた耐久値の回復が行えます。</p>
                 <p><b class="text-white">👥 採用・合議・海外研修：</b>毎年4月は新卒採用、7・10・1月は中途採用が開催。人事部ではヘッドハンティング・学生青田刈り・職員海外研修（1〜2年間離脱後に2〜3能力が急成長）も可能です。</p>
@@ -485,6 +486,17 @@
             leadership: '統率力',
             presentation: 'プレゼン'
         };
+
+        // 役職昇進ステップ定義（平社員 → 係長 → 課長 → 部長 → 専務 → 常務 → 副社長）
+        const RANK_LADDER = [
+            { id: 'GENERAL', label: '平社員', statCap: 150, salaryMult: 1.00, bonusMult: 1.00, maxCount: null },
+            { id: 'CHIEF', label: '係長', statCap: 160, salaryMult: 1.15, bonusMult: 1.04, maxCount: null },
+            { id: 'MANAGER', label: '課長', statCap: 170, salaryMult: 1.30, bonusMult: 1.08, maxCount: null },
+            { id: 'DIRECTOR', label: '部長', statCap: 185, salaryMult: 1.50, bonusMult: 1.12, maxCount: null },
+            { id: 'SENIOR', label: '専務', statCap: 205, salaryMult: 1.75, bonusMult: 1.16, maxCount: 6 },
+            { id: 'MANAGING', label: '常務', statCap: 225, salaryMult: 2.05, bonusMult: 1.20, maxCount: 4 },
+            { id: 'VP', label: '副社長', statCap: 250, salaryMult: 2.40, bonusMult: 1.25, maxCount: 2 }
+        ];
 
         const DEPT_MASTER = {
             SALES: {
@@ -836,6 +848,7 @@
                     avatarSeed: randInt(1, 99999),
                     deptId,
                     rank: 'GENERAL',
+                    lastPromotedTurn: null,
                     age: empAge,
                     lv,
                     exp: 0,
@@ -954,19 +967,35 @@
                 return this.getNeighbors(hex.q, hex.r).some(n => n.owner === owner && (n.type !== 'DEPT' || n.deptActive !== false));
             }
 
+            getRankDef(rankId) {
+                return RANK_LADDER.find(r => r.id === rankId) || RANK_LADDER[0];
+            }
+
+            getNextRankDef(rankId) {
+                const idx = RANK_LADDER.findIndex(r => r.id === rankId);
+                if (idx === -1 || idx >= RANK_LADDER.length - 1) return null;
+                return RANK_LADDER[idx + 1];
+            }
+
+            getEmployeeStatCap(emp) {
+                return this.getRankDef(emp ? emp.rank : 'GENERAL').statCap;
+            }
+
+            getRankCount(rankId, side = 'PLAYER') {
+                const corp = side === 'PLAYER' ? this.player : this.enemy;
+                return corp.employees.filter(e => e.rank === rankId).length;
+            }
+
             getEffectiveStat(emp, statKey) {
                 if (!emp || emp.overseasTurnsLeft > 0) return 0;
                 const base = emp.stats[statKey] || 30;
                 const loyaltyMult = 0.8 + (emp.loyalty / 100) * 0.35;
-                const rankBonus = emp.rank === 'VP' ? 1.2 : (emp.rank === 'SENIOR' ? 1.14 : (emp.rank === 'MANAGING' ? 1.08 : 1.0));
-                return Math.round(base * loyaltyMult * rankBonus);
+                const rankDef = this.getRankDef(emp.rank);
+                return Math.round(base * loyaltyMult * rankDef.bonusMult);
             }
 
             getRankLabel(rank) {
-                if (rank === 'VP') return '副社長';
-                if (rank === 'SENIOR') return '専務';
-                if (rank === 'MANAGING') return '常務';
-                return '一般社員';
+                return this.getRankDef(rank).label;
             }
 
             getDeptEmployees(deptId, side = 'PLAYER') {
@@ -1395,7 +1424,6 @@
                 const deptName = DEPT_MASTER[targetDeptId].name;
                 targetHex.hp = Math.max(0, targetHex.hp - dmg);
 
-                // 該当部門の敵社員の愛社心も低下
                 this.enemy.employees.forEach(e => {
                     if (e.deptId === targetDeptId) e.loyalty = Math.max(10, e.loyalty - 15);
                 });
@@ -1437,14 +1465,12 @@
                 const rollType = randInt(1, 3);
 
                 if (rollType === 1) {
-                    // 資金流出＆魅力ダウン
                     const loss = Math.round(pcPower * 5.0 + randInt(350, 700));
                     const charmLoss = randInt(4, 9);
                     this.enemy.funds -= loss;
                     this.enemy.charm = Math.max(0, this.enemy.charm - charmLoss);
                     effects.push(`敵資金 -${loss}万円流出`, `敵企業魅力 -${charmLoss}`);
                 } else if (rollType === 2) {
-                    // 全稼働部門への一斉システムダメージ
                     const dmg = Math.max(25, Math.round(pcPower * 0.4 + randInt(15, 30)));
                     let hitCount = 0;
                     this.hexes.forEach(h => {
@@ -1455,7 +1481,6 @@
                     });
                     effects.push(`敵稼働${hitCount}部門すべてに耐久 -${dmg} ダメージ`);
                 } else {
-                    // 基幹システム麻痺（敵資金損失＋全社員愛社心低下）
                     const loss = Math.round(pcPower * 3.5 + randInt(200, 450));
                     this.enemy.funds -= loss;
                     this.enemy.employees.forEach(e => { e.loyalty = Math.max(10, e.loyalty - 8); });
@@ -1520,8 +1545,9 @@
                 this.player.funds -= cost;
                 this.player.employees.forEach(emp => {
                     if (emp.overseasTurnsLeft > 0) return;
+                    const cap = this.getEmployeeStatCap(emp);
                     const keys = shuffleArray(STAT_KEYS).slice(0, 2);
-                    keys.forEach(k => { emp.stats[k] = Math.min(150, emp.stats[k] + randInt(2, 4)); });
+                    keys.forEach(k => { emp.stats[k] = Math.min(cap, emp.stats[k] + randInt(2, 4)); });
                     emp.loyalty = Math.min(100, emp.loyalty + 3);
                 });
 
@@ -1559,7 +1585,6 @@
                 return [4, 7, 10, 1].includes(this.month);
             }
 
-            // 会社の魅力値に応じた応募人数（2〜6名）
             getRecruitApplicantCount() {
                 const charm = this.player.charm || 50;
                 if (charm >= 120) return 6;
@@ -1569,7 +1594,6 @@
                 return 2;
             }
 
-            // 学生青田買いの候補者数（企業魅力値により1〜3名で変動）
             getAotagaiApplicantCount() {
                 const charm = this.player.charm || 50;
                 if (charm >= 95) return 3;
@@ -1577,7 +1601,6 @@
                 return 1;
             }
 
-            // 学生青田買いの実施可能期間判定（10月〜3月）
             isAotagaiSeason() {
                 return [10, 11, 12, 1, 2, 3].includes(this.month);
             }
@@ -1585,7 +1608,6 @@
             refreshRecruitCandidates(type = null, silent = false, forceNew = false) {
                 const targetType = type || (this.month === 4 ? 'NEW_GRAD' : 'MID_CAREER');
 
-                // 同じターン＆同じ採用区分ですでに候補者が生成済みなら再抽選しない
                 if (!forceNew && this.recruitGeneratedTurn === this.turn && this.recruitType === targetType && this.recruitCandidates.length > 0) {
                     if (!silent) {
                         ui.openRecruitModal();
@@ -1641,36 +1663,24 @@
                 ui.updateAll();
             }
 
-            // 学生青田買い（10月〜3月のみ実施可・候補者1〜3名で魅力値により変動）
+            // 学生青田買い（10月〜3月のみ実施可・候補者1〜3名で魅力値により変動・実施後2ターン再実行不可）
             actionStudentAotagari() {
+                if ((this.player.aotagariCooldown || 0) > 0) {
+                    return ui.log(`⚠️ 学生青田買いは実施後2ターンのクールダウンが必要です（あと${this.player.aotagariCooldown}ターン）。`, 'text-amber-400');
+                }
                 if (!this.isAotagaiSeason()) {
                     return ui.log('⚠️ 学生青田買いは10月〜3月の期間のみ実施可能です。', 'text-amber-400');
                 }
                 if (this.player.ap <= 0) return ui.log('⚠️ 行動力（AP）が不足しています。', 'text-amber-400');
                 const cost = 350;
-                if (this.player.funds < cost) return ui.log(`⚠️ 学生青田買いリクルート費（${cost}万円）が不足しています。`, 'text-rose-400');
+                if (this.player.funds < cost) return ui.log(`⚠️ 青田買いリクルート費（${cost}万円）が不足しています。`, 'text-rose-400');
 
                 this.player.ap -= 1;
                 this.player.funds -= cost;
+                this.player.aotagariCooldown = 2;
                 this.gainEmployeeExp('HR', 25, 'PLAYER');
                 const count = this.getAotagaiApplicantCount();
-                ui.log(`🎓 人事部が学生青田買いを実施！企業魅力（${this.player.charm}）により有望学生 ${count}名を発掘しました。`, 'text-emerald-300 font-bold');
-                this.refreshRecruitCandidates('AOTAGARI', false, true);
-                ui.updateAll();
-            }
-
-            actionStudentAotagari() {
-                if ((this.player.aotagariCooldown || 0) > 0) {
-                    return ui.log(`⚠️ 学生青田刈りは実施後2ターンのクールダウンが必要です（あと${this.player.aotagariCooldown}ターン）。`, 'text-amber-400');
-                }
-                if (this.player.ap <= 0) return ui.log('⚠️ 行動力（AP）が不足しています。', 'text-amber-400');
-                const cost = 350;
-                if (this.player.funds < cost) return ui.log(`⚠️ 青田刈りリクルート費（${cost}万円）が不足しています。`, 'text-rose-400');
-                this.player.ap -= 1;
-                this.player.funds -= cost;
-                this.player.aotagariCooldown = 2; // 実施後2ターン再実行不可
-                this.gainEmployeeExp('HR', 25, 'PLAYER');
-                ui.log(`🎓 人事部が学生青田刈りを実施！成長率抜群の有望学生を発掘しました（実施後2ターン再実行不可）。`, 'text-emerald-300 font-bold');
+                ui.log(`🎓 人事部が学生青田買いを実施！企業魅力（${this.player.charm}）により有望学生 ${count}名を発掘しました（実施後2ターン再実行不可）。`, 'text-emerald-300 font-bold');
                 this.refreshRecruitCandidates('AOTAGARI', false, true);
                 ui.updateAll();
             }
@@ -1688,7 +1698,7 @@
                     return ui.showEventModal('部署定員オーバー', `${DEPT_MASTER[targetDeptId].name}はすでに定員（${deptCap}名）に達しています。\n別の空き部署を選択するか、総務部から部門増築を行ってください。`, '⚠️');
                 }
 
-                const executives = this.player.employees.filter(e => ['MANAGING', 'SENIOR', 'VP'].includes(e.rank) && e.overseasTurnsLeft <= 0);
+                const executives = this.player.employees.filter(e => ['SENIOR', 'MANAGING', 'VP'].includes(e.rank) && e.overseasTurnsLeft <= 0);
                 const hrMembers = this.getDeptEmployees('HR', 'PLAYER');
 
                 let approved = true;
@@ -1696,7 +1706,7 @@
 
                 if (executives.length === 0) {
                     approved = true;
-                    councilSummary = `常務・専務・副社長が不在のため、${this.player.presName}社長の決裁のみで即時採用決定！`;
+                    councilSummary = `専務・常務・副社長が不在のため、${this.player.presName}社長の決裁のみで即時採用決定！`;
                 } else {
                     let yesVotes = 1;
                     let totalVotes = 1;
@@ -1773,19 +1783,59 @@
                 ui.updateAll();
             }
 
-            promoteEmployee(empId, newRank) {
+            // ==========================================
+            // 役職昇進システム（平社員→係長→課長→部長→専務→常務→副社長）
+            // 昇進後1年間（12ターン）再昇進不可・AP消費なし・人数上限チェック
+            // ==========================================
+            getPromotionStatus(emp) {
+                const nextRank = this.getNextRankDef(emp.rank);
+                if (!nextRank) {
+                    return { canPromote: false, reason: '最高役職', nextRank: null, cooldownLeft: 0 };
+                }
+
+                if (emp.overseasTurnsLeft > 0) {
+                    return { canPromote: false, reason: '海外研修中', nextRank, cooldownLeft: 0 };
+                }
+
+                // 昇進後1年間（12ターン）は次の役職に昇進できない
+                if (emp.lastPromotedTurn !== null && emp.lastPromotedTurn !== undefined) {
+                    const elapsed = this.turn - emp.lastPromotedTurn;
+                    if (elapsed < 12) {
+                        return { canPromote: false, reason: `あと${12 - elapsed}T待機`, nextRank, cooldownLeft: 12 - elapsed };
+                    }
+                }
+
+                // 人数制限チェック（専務6名・常務4名・副社長2名）
+                if (nextRank.maxCount !== null) {
+                    const curCount = this.getRankCount(nextRank.id, 'PLAYER');
+                    if (curCount >= nextRank.maxCount) {
+                        return { canPromote: false, reason: `${nextRank.label}満員(${curCount}/${nextRank.maxCount})`, nextRank, cooldownLeft: 0 };
+                    }
+                }
+
+                return { canPromote: true, reason: '', nextRank, cooldownLeft: 0 };
+            }
+
+            promoteEmployee(empId) {
                 const emp = this.player.employees.find(e => e.id === empId);
                 if (!emp) return;
-                if ((newRank === 'MANAGING' || newRank === 'SENIOR') && this.player.corpLv < 5) {
-                    return ui.log('⚠️ 常務・専務への昇進には企業Lv.5以上が必要です。', 'text-amber-400');
+
+                const status = this.getPromotionStatus(emp);
+                if (!status.canPromote || !status.nextRank) {
+                    return ui.log(`⚠️ ${emp.name}は現在昇進できません（${status.reason}）。`, 'text-amber-400');
                 }
-                if (newRank === 'VP' && this.player.corpLv < 10) {
-                    return ui.log('⚠️ 副社長への昇進には企業Lv.10以上が必要です。', 'text-amber-400');
-                }
-                emp.rank = newRank;
-                emp.salary = Math.round(emp.salary * 1.35);
-                emp.loyalty = Math.min(100, emp.loyalty + 10);
-                ui.log(`🎖️ ${emp.name}が「${this.getRankLabel(newRank)}」へ昇進しました！（能力補正UP・月給 ${emp.salary}万円）`, 'text-amber-300 font-bold');
+
+                const prevRankDef = this.getRankDef(emp.rank);
+                const nextRankDef = status.nextRank;
+
+                // 月収を役職倍率に合わせて上昇（最低+15%以上上昇）
+                const ratio = nextRankDef.salaryMult / prevRankDef.salaryMult;
+                emp.salary = Math.max(emp.salary + 8, Math.round(emp.salary * ratio));
+                emp.rank = nextRankDef.id;
+                emp.lastPromotedTurn = this.turn;
+                emp.loyalty = Math.min(100, emp.loyalty + 8);
+
+                ui.log(`🎖️ ${emp.name}が「${nextRankDef.label}」へ昇進しました！（能力上限 ${nextRankDef.statCap} へ上昇・月給 ${emp.salary}万円 / 1年間昇進待機）`, 'text-amber-300 font-bold');
                 ui.updateAll();
             }
 
@@ -1914,8 +1964,9 @@
                     if (e.exp >= req) {
                         e.exp -= req;
                         e.lv += 1;
+                        const cap = this.getEmployeeStatCap(e);
                         const keys = shuffleArray(STAT_KEYS).slice(0, 2);
-                        keys.forEach(k => { e.stats[k] = Math.min(150, e.stats[k] + e.growth); });
+                        keys.forEach(k => { e.stats[k] = Math.min(cap, e.stats[k] + e.growth); });
                         if (side === 'PLAYER') {
                             ui.log(`🆙 ${e.name}（${DEPT_MASTER[deptId].name}）が Lv.${e.lv} に成長！`, 'text-sky-300');
                         }
@@ -1984,10 +2035,11 @@
                     if (emp.overseasTurnsLeft > 0) {
                         emp.overseasTurnsLeft -= 1;
                         if (emp.overseasTurnsLeft === 0) {
+                            const cap = this.getEmployeeStatCap(emp);
                             const growKeys = shuffleArray(STAT_KEYS).slice(0, randInt(2, 3));
                             const details = growKeys.map(k => {
                                 const up = randInt(16, 28);
-                                emp.stats[k] = Math.min(150, emp.stats[k] + up);
+                                emp.stats[k] = Math.min(cap, emp.stats[k] + up);
                                 return `${STAT_LABELS[k]}+${up}`;
                             }).join('・');
                             emp.loyalty = Math.min(100, emp.loyalty + 10);
@@ -2012,7 +2064,6 @@
                     this.year += 1;
                 }
 
-                // ヘッドハンティングのクールタイム減少
                 if ((this.player.headhuntCooldown || 0) > 0) {
                     this.player.headhuntCooldown -= 1;
                 }
@@ -2170,13 +2221,11 @@
                     const candidates = this.hexes.filter(h => h.owner !== 'ENEMY' && this.isAdjacentToOwner(h, 'ENEMY'));
                     if (candidates.length === 0) break;
 
-                    // 自社物件・拠点への攻撃・商談仕掛け（確率28%）
                     const playerTargets = candidates.filter(h => h.owner === 'PLAYER');
                     if (playerTargets.length > 0 && Math.random() < 0.28 && this.enemy.funds >= 400) {
                         const target = playerTargets[randInt(0, playerTargets.length - 1)];
                         this.enemy.funds -= 350;
 
-                        // ハッキング防御展開中なら敵の攻撃を1度防ぐ
                         if (this.player.hackingDefenseActive) {
                             this.player.hackingDefenseActive = false;
                             const tName = target.type === 'DEPT' ? DEPT_MASTER[target.deptId].name : target.propType.name;
@@ -2200,7 +2249,6 @@
                         }
                     }
 
-                    // 中立物件の買収
                     const neutrals = candidates.filter(h => h.owner === 'NEUTRAL');
                     if (neutrals.length > 0 && this.enemy.funds >= 300) {
                         const target = neutrals[randInt(0, neutrals.length - 1)];
@@ -2362,7 +2410,6 @@
                 document.getElementById('hdr-date').textContent = `${game.year}年目 ${game.month}月 (${game.turn}T)`;
                 document.getElementById('hdr-funds').textContent = formatYenFromMan(game.player.funds);
 
-                // ハッキング防御中バッジの表示切替
                 const shieldEl = document.getElementById('hdr-hack-shield');
                 if (shieldEl) {
                     if (game.player.hackingDefenseActive) {
@@ -2538,8 +2585,8 @@
                                 </button>
                                 ${dept.id === 'HR' ? `
                                     <button onclick="ui.openRecruitModal()" class="btn-game bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">🤝 採用面接</button>
-                                    <button onclick="game.actionHeadhunting()" ${game.player.ap <= 0 || game.player.funds < 500 ? 'disabled' : ''} class="btn-game bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">🎯 ヘッドハンティング (500万)</button>
-                                    <button onclick="game.actionStudentAotagari()" ${(game.player.aotagariCooldown || 0) > 0 || game.player.ap <= 0 || game.player.funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">${(game.player.aotagariCooldown || 0) > 0 ? `🎓 青田刈り待機(あと${game.player.aotagariCooldown}T)` : '🎓 学生青田刈り (350万)'}</button>
+                                    <button onclick="game.actionHeadhunting()" ${(game.player.headhuntCooldown || 0) > 0 || game.player.ap <= 0 || game.player.funds < 500 ? 'disabled' : ''} class="btn-game bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">${(game.player.headhuntCooldown || 0) > 0 ? `🎯 ヘッドハント待機(あと${game.player.headhuntCooldown}T)` : '🎯 ヘッドハンティング (500万)'}</button>
+                                    <button onclick="game.actionStudentAotagari()" ${(game.player.aotagariCooldown || 0) > 0 || !game.isAotagaiSeason() || game.player.ap <= 0 || game.player.funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">${(game.player.aotagariCooldown || 0) > 0 ? `🎓 青田買い待機(あと${game.player.aotagariCooldown}T)` : (!game.isAotagaiSeason() ? '🎓 青田買い(10〜3月限定)' : '🎓 学生青田買い (350万)')}</button>
                                     <button onclick="ui.openOverseasModal()" ${game.player.ap <= 0 || game.player.funds < 400 ? 'disabled' : ''} class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">✈️ 職員海外研修 (400万)</button>
                                 ` : ''}
                                 ${dept.id === 'ACCOUNT' ? `
@@ -2741,11 +2788,11 @@
                                 <button onclick="ui.openRecruitModal()" class="btn-game bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
                                     🤝 採用面接・合議
                                 </button>
-                                <button onclick="game.actionHeadhunting()" ${ap <= 0 || funds < 500 ? 'disabled' : ''} class="btn-game bg-amber-600 hover:bg-amber-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
-                                    🎯 ヘッドハンティング (500万/AP1)
+                                <button onclick="game.actionHeadhunting()" ${(game.player.headhuntCooldown || 0) > 0 || ap <= 0 || funds < 500 ? 'disabled' : ''} class="btn-game bg-amber-600 hover:bg-amber-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
+                                    ${(game.player.headhuntCooldown || 0) > 0 ? `🎯 ヘッドハント (あと${game.player.headhuntCooldown}T)` : '🎯 ヘッドハンティング (500万/AP1)'}
                                 </button>
-                                <button onclick="game.actionStudentAotagari()" ${(game.player.aotagariCooldown || 0) > 0 || ap <= 0 || funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
-                                    ${(game.player.aotagariCooldown || 0) > 0 ? `🎓 学生青田刈り (あと${game.player.aotagariCooldown}T)` : '🎓 学生青田刈り (350万/AP1)'}
+                                <button onclick="game.actionStudentAotagari()" ${(game.player.aotagariCooldown || 0) > 0 || !game.isAotagaiSeason() || ap <= 0 || funds < 350 ? 'disabled' : ''} class="btn-game bg-teal-600 hover:bg-teal-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
+                                    ${(game.player.aotagariCooldown || 0) > 0 ? `🎓 学生青田買い (あと${game.player.aotagariCooldown}T)` : (!game.isAotagaiSeason() ? '🎓 学生青田買い (10〜3月限定)' : '🎓 学生青田買い (350万/AP1)')}
                                 </button>
                                 <button onclick="ui.openOverseasModal()" ${ap <= 0 || funds < 400 ? 'disabled' : ''} class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-2.5 rounded-xl text-[11px]">
                                     ✈️ 職員海外研修 (400万/AP1)
@@ -2855,8 +2902,12 @@
                     list.sort((a, b) => game.getEffectiveStat(b, this.empSortKey) - game.getEffectiveStat(a, this.empSortKey));
                 }
 
+                const senmuCount = game.getRankCount('SENIOR', 'PLAYER');
+                const jomuCount = game.getRankCount('MANAGING', 'PLAYER');
+                const vpCount = game.getRankCount('VP', 'PLAYER');
+
                 area.innerHTML = `
-                    <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2.5 bg-slate-950 p-2 rounded-xl border border-slate-800">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
                         <div class="flex flex-wrap items-center gap-1.5">
                             <select onchange="ui.empDeptFilter=this.value; ui.renderActiveTab();" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-white">
                                 <option value="ALL" ${this.empDeptFilter === 'ALL' ? 'selected' : ''}>全部署 (${game.player.employees.length})</option>
@@ -2880,10 +2931,18 @@
                         </div>
                     </div>
 
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300">
+                        <span>🎖️ 役職枠：副社長 <b class="text-amber-300">${vpCount}/2</b>名 ／ 常務 <b class="text-amber-300">${jomuCount}/4</b>名 ／ 専務 <b class="text-amber-300">${senmuCount}/6</b>名</span>
+                        <span class="text-slate-400">※AP消費なし・昇進後1年間(12T)再昇進不可</span>
+                    </div>
+
                     <div class="space-y-2">
                         ${list.map(emp => {
                             const dept = DEPT_MASTER[emp.deptId];
                             const isTraining = emp.overseasTurnsLeft > 0;
+                            const statCap = game.getEmployeeStatCap(emp);
+                            const prom = game.getPromotionStatus(emp);
+
                             return `
                                 <div class="bg-slate-800/90 border ${isTraining ? 'border-indigo-500/70' : 'border-slate-700'} rounded-xl p-2.5">
                                     <div class="flex items-center justify-between gap-2">
@@ -2897,20 +2956,18 @@
                                                     ${isTraining ? `<span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-indigo-600 text-white">✈️ 海外研修中(あと${emp.overseasTurnsLeft}T)</span>` : ''}
                                                 </div>
                                                 <div class="text-[11px] text-slate-400 mt-0.5">
-                                                    ${emp.age}歳 / Lv.${emp.lv} / 愛社心 <b class="text-pink-300">${emp.loyalty}</b> / 月給 <b>${emp.salary}万円</b>
+                                                    ${emp.age}歳 / Lv.${emp.lv} / 愛社心 <b class="text-pink-300">${emp.loyalty}</b> / 月給 <b>${emp.salary}万円</b> / 能力上限 <b class="text-sky-300">${statCap}</b>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex flex-col gap-1">
-                                            ${emp.rank === 'GENERAL' && game.player.corpLv >= 5 ? `
-                                                <button onclick="game.promoteEmployee('${emp.id}', 'MANAGING')" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-black px-2 py-0.5 rounded text-[10px]">常務昇進</button>
-                                            ` : ''}
-                                            ${emp.rank === 'MANAGING' && game.player.corpLv >= 5 ? `
-                                                <button onclick="game.promoteEmployee('${emp.id}', 'SENIOR')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded text-[10px]">専務昇進</button>
-                                            ` : ''}
-                                            ${emp.rank === 'SENIOR' && game.player.corpLv >= 10 ? `
-                                                <button onclick="game.promoteEmployee('${emp.id}', 'VP')" class="bg-orange-500 hover:bg-orange-400 text-slate-950 font-black px-2 py-0.5 rounded text-[10px]">副社長昇進</button>
-                                            ` : ''}
+                                        <div class="flex flex-col items-end gap-1 shrink-0">
+                                            ${prom.nextRank ? `
+                                                <button onclick="game.promoteEmployee('${emp.id}')" ${!prom.canPromote ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-400 disabled:bg-slate-700 disabled:text-slate-400 text-slate-950 font-black px-2.5 py-1 rounded text-[10px]">
+                                                    ${prom.canPromote ? `🎖️ ${prom.nextRank.label}へ昇進` : `🎖️ ${prom.nextRank.label}(${prom.reason})`}
+                                                </button>
+                                            ` : `
+                                                <span class="text-[10px] font-black text-amber-300 bg-slate-900 px-2 py-0.5 rounded border border-amber-500/40">👑 最高役職</span>
+                                            `}
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-4 sm:grid-cols-7 gap-1 mt-2 pt-2 border-t border-slate-700/70 text-[10px]">
@@ -3087,13 +3144,13 @@
                 };
                 document.getElementById('recruit-modal-title').textContent = titles[game.recruitType] || '🤝 採用面接・役員合議';
 
-                const execs = game.player.employees.filter(e => ['MANAGING', 'SENIOR', 'VP'].includes(e.rank) && e.overseasTurnsLeft <= 0);
+                const execs = game.player.employees.filter(e => ['SENIOR', 'MANAGING', 'VP'].includes(e.rank) && e.overseasTurnsLeft <= 0);
                 const countInfo = game.recruitType === 'HEADHUNT'
                     ? 'ヘッドハンティング発掘：1名'
                     : (game.recruitType === 'AOTAGARI' ? `学生青田買い応募枠：${game.getAotagaiApplicantCount()}名` : `応募枠：${game.getRecruitApplicantCount()}名`);
                 const charmInfo = `<span class="text-pink-300 font-bold">（現在の企業魅力 ${game.player.charm} ／ ${countInfo}）</span>`;
                 document.getElementById('recruit-council-info').innerHTML = (execs.length === 0
-                    ? `⚖️ <b>合議体制：</b>現在、常務・専務・副社長が不在のため、<b>${game.player.presName}社長の判断のみで即決採用</b>できます。`
+                    ? `⚖️ <b>合議体制：</b>現在、専務・常務・副社長が不在のため、<b>${game.player.presName}社長の判断のみで即決採用</b>できます。`
                     : `⚖️ <b>合議体制：</b>${game.player.presName}社長 ＋ 人事部員 ＋ 在籍役員（${execs.map(e => `${e.name}${game.getRankLabel(e.rank)}`).join('・')}）の<b>多数決</b>で採否を決定します。`) + charmInfo;
                 const activeDepts = Object.values(DEPT_MASTER).filter(d => (game.player.deptLevels[d.id] || 0) > 0);
                 const listEl = document.getElementById('recruit-candidates-list');
@@ -3461,6 +3518,12 @@
                 }
                 if (typeof game.player.hackingDefenseActive !== 'boolean') {
                     game.player.hackingDefenseActive = false;
+                }
+                if (Array.isArray(game.player.employees)) {
+                    game.player.employees.forEach(emp => {
+                        if (emp.lastPromotedTurn === undefined) emp.lastPromotedTurn = null;
+                        if (!RANK_LADDER.some(r => r.id === emp.rank)) emp.rank = 'GENERAL';
+                    });
                 }
                 game.enemy = data.enemy;
                 game.hexes = data.hexes;
