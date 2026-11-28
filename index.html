@@ -67,7 +67,7 @@
             <div class="text-center mb-5">
                 <div class="flex items-center justify-center gap-2 mb-2">
                     <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black px-3 py-1 rounded-full">CORPORATE WARS - 企業陣取り経営SLG</span>
-                    <span class="inline-block bg-slate-800 text-sky-300 border border-sky-500/40 text-xs font-black px-2.5 py-1 rounded-full">Ver. 1.15.0</span>
+                    <span class="inline-block bg-slate-800 text-sky-300 border border-sky-500/40 text-xs font-black px-2.5 py-1 rounded-full">Ver. 1.16.0</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">🏢 代表取締役社長 就任設定</h1>
                 <p class="text-xs sm:text-sm text-slate-300 mt-1">社長名と初期経営タイプ（5候補から1つ）を選択して会社を設立してください。</p>
@@ -110,7 +110,7 @@
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black px-2.5 py-1 rounded-xl text-xs sm:text-sm shadow">
                     🏢 <span id="hdr-comp-name">アーク・イノベーション</span>
                 </div>
-                <span class="text-[10px] font-black text-sky-300 bg-slate-800/90 border border-sky-500/40 px-2 py-0.5 rounded-md">Ver. 1.15.0</span>
+                <span class="text-[10px] font-black text-sky-300 bg-slate-800/90 border border-sky-500/40 px-2 py-0.5 rounded-md">Ver. 1.16.0</span>
                 <div class="text-xs font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
                     <span id="hdr-pres-name">天海 翔太社長</span>
                 </div>
@@ -460,7 +460,7 @@
             <div class="text-xs text-slate-300 space-y-2.5 max-h-[65vh] overflow-y-auto custom-scroll pr-1 leading-relaxed">
                 <p><b class="text-white">🏆 勝利条件：</b>① 全271ヘックスを自陣営が取得する、② ライバル企業を破産（資産0未満）させる、③ ライバル企業の全稼働施設（部門ヘックス）の耐久値を0にする、のいずれかで勝利となります。</p>
                 <p><b class="text-white">🏢 部門と予定地ヘックス：</b>営業・経理・総務・人事は初期稼働済み。広報部（Lv.5〜）・情報システム部（Lv.10〜）・研究開発部（Lv.15〜）は自社エリアにグレーアウト予定地として配置されており、条件達成後に稼働開始できます。</p>
-                <p><b class="text-white">🎖️ 社員の役職昇進制度：</b>平社員から「係長 → 課長 → 部長 → 専務（最大6名） → 常務（最大4名） → 副社長（最大2名）」の順に1段階ずつ昇進できます（AP消費なし）。昇進すると能力上限値と月収が上昇し、昇進後1年間（12ターン）は次の役職へ昇進できません。</p>
+                <p><b class="text-white">🎖️ 社員の役職昇進制度：</b>平社員から「係長（入社1年＋Lv.2〜） → 課長（Lv.3〜） → 部長（Lv.4〜） → 専務（Lv.5〜・最大6名） → 常務（Lv.6〜・最大4名） → 副社長（Lv.7〜・最大2名）」の順に1段階ずつ昇進できます（AP消費なし）。昇進すると能力上限値と月収が上昇し、昇進後1年間（12ターン）は次の役職へ昇進できません。</p>
                 <p><b class="text-white">💻 情報システム部のサイバー攻防：</b>稼働すると最大AP+1に加え、「特定部門攻撃」「総合攻撃（ランダム）」「ハッキング防御（敵の攻撃を一度防ぐ・メイン画面に防御中表示）」が実行できます。</p>
                 <p><b class="text-white">🏘️ 全13種の物件と増資：</b>駐車場・一戸建住宅・コンビニ・倉庫・小店舗・事務所・商店街・工場・スーパーマーケット・マンション・ホテル・タワーマンション・大学が登場。買収から12ターン経過すると規模に応じた限度額まで「増資」でき、収益UP・耐久上限UP・削られた耐久値の回復が行えます。</p>
                 <p><b class="text-white">👥 採用・合議・海外研修：</b>毎年4月は新卒採用、7・10・1月は中途採用が開催。人事部ではヘッドハンティング・学生青田刈り・職員海外研修（1〜2年間離脱後に2〜3能力が急成長）も可能です。</p>
@@ -489,13 +489,13 @@
 
         // 役職昇進ステップ定義（平社員 → 係長 → 課長 → 部長 → 専務 → 常務 → 副社長）
         const RANK_LADDER = [
-            { id: 'GENERAL', label: '平社員', statCap: 150, salaryMult: 1.00, bonusMult: 1.00, maxCount: null },
-            { id: 'CHIEF', label: '係長', statCap: 160, salaryMult: 1.15, bonusMult: 1.04, maxCount: null },
-            { id: 'MANAGER', label: '課長', statCap: 170, salaryMult: 1.30, bonusMult: 1.08, maxCount: null },
-            { id: 'DIRECTOR', label: '部長', statCap: 185, salaryMult: 1.50, bonusMult: 1.12, maxCount: null },
-            { id: 'SENIOR', label: '専務', statCap: 205, salaryMult: 1.75, bonusMult: 1.16, maxCount: 6 },
-            { id: 'MANAGING', label: '常務', statCap: 225, salaryMult: 2.05, bonusMult: 1.20, maxCount: 4 },
-            { id: 'VP', label: '副社長', statCap: 250, salaryMult: 2.40, bonusMult: 1.25, maxCount: 2 }
+            { id: 'GENERAL', label: '平社員', statCap: 150, salaryMult: 1.00, bonusMult: 1.00, maxCount: null, reqLv: 1, reqTenure: 0 },
+            { id: 'CHIEF', label: '係長', statCap: 160, salaryMult: 1.15, bonusMult: 1.04, maxCount: null, reqLv: 2, reqTenure: 12 },
+            { id: 'MANAGER', label: '課長', statCap: 170, salaryMult: 1.30, bonusMult: 1.08, maxCount: null, reqLv: 3, reqTenure: 12 },
+            { id: 'DIRECTOR', label: '部長', statCap: 185, salaryMult: 1.50, bonusMult: 1.12, maxCount: null, reqLv: 4, reqTenure: 12 },
+            { id: 'SENIOR', label: '専務', statCap: 205, salaryMult: 1.75, bonusMult: 1.16, maxCount: 6, reqLv: 5, reqTenure: 12 },
+            { id: 'MANAGING', label: '常務', statCap: 225, salaryMult: 2.05, bonusMult: 1.20, maxCount: 4, reqLv: 6, reqTenure: 12 },
+            { id: 'VP', label: '副社長', statCap: 250, salaryMult: 2.40, bonusMult: 1.25, maxCount: 2, reqLv: 7, reqTenure: 12 }
         ];
 
         const DEPT_MASTER = {
@@ -848,6 +848,7 @@
                     avatarSeed: randInt(1, 99999),
                     deptId,
                     rank: 'GENERAL',
+                    hiredTurn: this.turn,
                     lastPromotedTurn: null,
                     age: empAge,
                     lv,
@@ -1785,7 +1786,7 @@
 
             // ==========================================
             // 役職昇進システム（平社員→係長→課長→部長→専務→常務→副社長）
-            // 昇進後1年間（12ターン）再昇進不可・AP消費なし・人数上限チェック
+            // 入社後1年間（12ターン）＆規定Lv到達が必要・昇進後1年間（12ターン）再昇進不可・AP消費なし
             // ==========================================
             getPromotionStatus(emp) {
                 const nextRank = this.getNextRankDef(emp.rank);
@@ -1795,6 +1796,18 @@
 
                 if (emp.overseasTurnsLeft > 0) {
                     return { canPromote: false, reason: '海外研修中', nextRank, cooldownLeft: 0 };
+                }
+
+                // 入社後1年間（12ターン）は平社員からの昇進不可
+                const hiredTurn = (emp.hiredTurn !== null && emp.hiredTurn !== undefined) ? emp.hiredTurn : 1;
+                const tenure = this.turn - hiredTurn;
+                if (nextRank.reqTenure && tenure < nextRank.reqTenure) {
+                    return { canPromote: false, reason: `入社1年未満(あと${nextRank.reqTenure - tenure}T)`, nextRank, cooldownLeft: nextRank.reqTenure - tenure };
+                }
+
+                // 必要社員レベルチェック（平社員→係長はLv.2以上など）
+                if (nextRank.reqLv && (emp.lv || 1) < nextRank.reqLv) {
+                    return { canPromote: false, reason: `要Lv.${nextRank.reqLv}(現在Lv.${emp.lv || 1})`, nextRank, cooldownLeft: 0 };
                 }
 
                 // 昇進後1年間（12ターン）は次の役職に昇進できない
@@ -2323,8 +2336,11 @@
                 this.mapPanX = 0;
                 this.mapPanY = 0;
                 this.isDragging = false;
+                this.hasDragged = false;
                 this.dragStartX = 0;
                 this.dragStartY = 0;
+                this.downClientX = 0;
+                this.downClientY = 0;
 
                 this.setupMapPanEvents();
             }
@@ -2332,23 +2348,72 @@
             setupMapPanEvents() {
                 const vp = document.getElementById('map-viewport');
                 if (!vp) return;
+
+                // 左ドラッグでマップ移動（ヘックス上からドラッグ開始しても移動できるよう対応）
                 vp.addEventListener('mousedown', (e) => {
-                    if (e.target.closest('.hex-group')) return;
+                    if (e.button !== 0) return; // 左クリックのみ
                     this.isDragging = true;
+                    this.hasDragged = false;
+                    this.downClientX = e.clientX;
+                    this.downClientY = e.clientY;
                     this.dragStartX = e.clientX - this.mapPanX;
                     this.dragStartY = e.clientY - this.mapPanY;
                 });
+
                 window.addEventListener('mousemove', (e) => {
                     if (!this.isDragging) return;
-                    this.mapPanX = e.clientX - this.dragStartX;
-                    this.mapPanY = e.clientY - this.dragStartY;
-                    this.applyMapTransform();
+                    const dx = Math.abs(e.clientX - this.downClientX);
+                    const dy = Math.abs(e.clientY - this.downClientY);
+                    if (dx > 4 || dy > 4) {
+                        this.hasDragged = true;
+                    }
+                    if (this.hasDragged) {
+                        this.mapPanX = e.clientX - this.dragStartX;
+                        this.mapPanY = e.clientY - this.dragStartY;
+                        this.applyMapTransform();
+                    }
                 });
-                window.addEventListener('mouseup', () => { this.isDragging = false; });
+
+                window.addEventListener('mouseup', (e) => {
+                    if (e.button === 0 && this.isDragging) {
+                        this.isDragging = false;
+                        // ドラッグ終了直後のクリック発火を抑制するため1フレーム後にフラグ解除
+                        setTimeout(() => { this.hasDragged = false; }, 0);
+                    }
+                });
+
+                // マウスホイール（スクロールボタン）でカーソル位置を中心に拡大・縮小
+                vp.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const rect = vp.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    const oldZoom = this.mapZoom;
+                    const factor = e.deltaY < 0 ? 1.12 : (1 / 1.12);
+                    const newZoom = Math.max(0.45, Math.min(2.6, oldZoom * factor));
+                    if (newZoom === oldZoom) return;
+
+                    // カーソル直下のマップ座標がズレないようにパン位置を補正
+                    this.mapPanX = mouseX - (mouseX - this.mapPanX) * (newZoom / oldZoom);
+                    this.mapPanY = mouseY - (mouseY - this.mapPanY) * (newZoom / oldZoom);
+                    this.mapZoom = newZoom;
+                    this.applyMapTransform();
+                }, { passive: false });
             }
 
             zoomMap(delta) {
-                this.mapZoom = Math.max(0.55, Math.min(2.2, this.mapZoom + delta));
+                const vp = document.getElementById('map-viewport');
+                const oldZoom = this.mapZoom;
+                const newZoom = Math.max(0.45, Math.min(2.6, oldZoom + delta));
+                if (vp) {
+                    const rect = vp.getBoundingClientRect();
+                    const cx = rect.width / 2;
+                    const cy = rect.height / 2;
+                    this.mapPanX = cx - (cx - this.mapPanX) * (newZoom / oldZoom);
+                    this.mapPanY = cy - (cy - this.mapPanY) * (newZoom / oldZoom);
+                }
+                this.mapZoom = newZoom;
                 this.applyMapTransform();
             }
 
@@ -2504,7 +2569,7 @@
                     const textOpacityClass = isInactiveDept ? 'opacity-60' : '';
 
                     svgContent += `
-                        <g class="hex-group" onclick="ui.selectHex('${h.key}')">
+                        <g class="hex-group" onclick="ui.handleHexClick('${h.key}')">
                             <polygon points="${pts.join(' ')}" fill="${fill}" stroke="${isSelected ? '#facc15' : stroke}" stroke-width="${isSelected ? 3 : 1.5}" stroke-dasharray="${isInactiveDept ? '4,3' : 'none'}" class="${polyClass}" />
                             <text x="${cx}" y="${cy - 3}" text-anchor="middle" fill="${isInactiveDept ? '#cbd5e1' : '#ffffff'}" font-size="9.5" font-weight="900" class="pointer-events-none select-none ${textOpacityClass}">${label}</text>
                             <text x="${cx}" y="${cy + 9}" text-anchor="middle" fill="${isInactiveDept ? '#94a3b8' : '#e2e8f0'}" font-size="8" font-weight="700" class="pointer-events-none select-none ${textOpacityClass}">${subLabel}</text>
@@ -2518,6 +2583,12 @@
 
                 svgContent += `</g>`;
                 svg.innerHTML = svgContent;
+            }
+
+            handleHexClick(key) {
+                // 左ドラッグによるマップ移動時はヘックス選択を発火させない
+                if (this.hasDragged) return;
+                this.selectHex(key);
             }
 
             selectHex(key) {
@@ -2933,7 +3004,7 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300">
                         <span>🎖️ 役職枠：副社長 <b class="text-amber-300">${vpCount}/2</b>名 ／ 常務 <b class="text-amber-300">${jomuCount}/4</b>名 ／ 専務 <b class="text-amber-300">${senmuCount}/6</b>名</span>
-                        <span class="text-slate-400">※AP消費なし・昇進後1年間(12T)再昇進不可</span>
+                        <span class="text-slate-400">※係長は入社1年(12T)＋Lv.2以上が必要・昇進後1年間(12T)再昇進不可</span>
                     </div>
 
                     <div class="space-y-2">
@@ -3521,6 +3592,7 @@
                 }
                 if (Array.isArray(game.player.employees)) {
                     game.player.employees.forEach(emp => {
+                        if (emp.hiredTurn === undefined) emp.hiredTurn = 1;
                         if (emp.lastPromotedTurn === undefined) emp.lastPromotedTurn = null;
                         if (!RANK_LADDER.some(r => r.id === emp.rank)) emp.rank = 'GENERAL';
                     });
